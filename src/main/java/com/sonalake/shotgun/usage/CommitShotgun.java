@@ -3,6 +3,7 @@ package com.sonalake.shotgun.usage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Singular;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,5 +18,6 @@ public class CommitShotgun {
   private String message;
   private Double score;
   private Integer size;
+  @Singular
   private List<CommitEntry> entries;
 }

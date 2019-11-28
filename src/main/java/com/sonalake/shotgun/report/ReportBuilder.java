@@ -22,11 +22,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sonalake.shotgun.usage.Utils.median;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.groupingBy;
+import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
 
 public class ReportBuilder {
 
+  static final String REPO = "repo";
+  static final String LEGEND = "legend";
+  static final String HEAT_MAP = "heatMap";
+  static final String BUSY_SETS = "busySets";
+  static final String BUSY_FILES = "busyFiles";
+  static final String COMMIT_DATA = "commitData";
   private final List<CommitShotgun> commitScores;
   private final ShotgunConfig config;
 
@@ -45,7 +53,7 @@ public class ReportBuilder {
     writeReport(target, reportMap);
   }
 
-  void writeReport(Path target, Map<String, String> reportData) throws IOException, TemplateException {
+  private void writeReport(Path target, Map<String, String> reportData) throws IOException, TemplateException {
     Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
     cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
     Files.createDirectories(target.getParent());
@@ -64,16 +72,16 @@ public class ReportBuilder {
 
     ObjectMapper mapper = new ObjectMapper();
     return Map.of(
-      "repo", config.getInputDirectory().getFileName().toString(),
-      "legend", StringUtils.join(config.getLegendLevels(), ","),
-      "heatMap", mapper.writeValueAsString(heatMap),
-      "busySets", mapper.writeValueAsString(busySets),
-      "busyFiles", mapper.writeValueAsString(busyFiles),
-      "commitData", mapper.writeValueAsString(commitData)
+      REPO, config.getInputDirectory().getFileName().toString(),
+      LEGEND, StringUtils.join(config.getLegendLevels(), ","),
+      HEAT_MAP, mapper.writeValueAsString(heatMap),
+      BUSY_SETS, mapper.writeValueAsString(busySets),
+      BUSY_FILES, mapper.writeValueAsString(busyFiles),
+      COMMIT_DATA, mapper.writeValueAsString(commitData)
     );
   }
 
-  public Map<Long, Double> exportCalendarHeatMap() throws IOException {
+  Map<Long, Double> exportCalendarHeatMap() throws IOException {
     // group the commits by date
     Map<Long, Double> data = new TreeMap<>();
     commitScores.stream()
@@ -89,7 +97,7 @@ public class ReportBuilder {
   }
 
 
-  private List<? extends Map<String, ?>> getCommitData() {
+  List<? extends Map<String, ?>> getCommitData() {
     return commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
       .entrySet()
@@ -99,30 +107,32 @@ public class ReportBuilder {
       .collect(Collectors.toList());
   }
 
-  private List<Map<String, ?>> getBusyFiles(int top, int lowerLimit) {
+  List<Map<String, ?>> getBusyFiles(int top, int lowerLimit) {
     Map<String, Integer> fileCounts = new HashMap<>();
 
-    commitScores.stream().flatMap(e -> e.getEntries().stream()).forEach(entry -> {
-      int count = fileCounts.getOrDefault(entry.getPath(), 0);
-      fileCounts.put(entry.getPath(), count + 1);
+    commitScores.forEach(commit -> {
+      commit.getEntries().stream()
+        .filter(e->!DELETE.equals(e.getChangeType()))
+        .forEach(entry -> {
+          Integer count = fileCounts.getOrDefault(entry.getPath(), 0);
+          fileCounts.put(entry.getPath(), ++count);
+        });
     });
 
     List<Integer> topUniqueValues = new TreeSet<>(fileCounts.values())
       .stream()
+      .filter(i->i>=lowerLimit)
       .sorted(reverseOrder())
+      .limit(top)
       .collect(Collectors.toList());
-    int lowWaterMark;
-    if (topUniqueValues.size() >= top) {
-      lowWaterMark = topUniqueValues.get(top);
-    } else if (!topUniqueValues.isEmpty()) {
-      lowWaterMark = topUniqueValues.get(topUniqueValues.size() - 1);
-    } else {
-      lowWaterMark = 0;
+
+    if (topUniqueValues.isEmpty()) {
+      return emptyList();
     }
 
+    Integer lowWaterMark = topUniqueValues.get(topUniqueValues.size() - 1);
     return fileCounts.entrySet().stream()
       .filter(e -> e.getValue() >= lowWaterMark)
-      .filter(e -> e.getValue() >= lowerLimit)
       .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
       .map(e -> Map.of(
         "count", e.getValue(),
@@ -131,7 +141,7 @@ public class ReportBuilder {
       .collect(Collectors.toList());
   }
 
-  private List<Map<String, ?>> getBusySets(int top, int lowerLimit) {
+  List<Map<String, ?>> getBusySets(int top, int lowerLimit) {
     Map<List<String>, Integer> setCounts = new HashMap<>();
     commitScores.stream().filter(e -> e.getEntries().size() > 1).forEach(commit -> {
       List<String> key = commit.getEntries().stream().map(CommitEntry::getPath).collect(Collectors.toList());
