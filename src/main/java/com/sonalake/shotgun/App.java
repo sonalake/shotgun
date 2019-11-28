@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 @Slf4j
 public class App {
@@ -26,10 +25,10 @@ public class App {
         parser.parse(args);
 
         if (params.isHelp()) {
-          parser.usage();
+            parser.usage();
 
         } else {
-          new App().process(params.toConfig());
+            new App().process(params.toConfig());
         }
     }
 

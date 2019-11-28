@@ -11,17 +11,17 @@ import java.util.List;
 @ToString
 public class ShotgunConfig {
 
-    private final Path inputDirectory;
-    private final Path outputFile;
-    @Singular
-    private final List<String> sourceSets;
+  private final Path inputDirectory;
+  private final Path outputFile;
+  @Singular
+  private final List<String> sourceSets;
 
-    private final Integer minimumCommitInterest;
+  private final Integer minimumCommitInterest;
 
-    private final Integer topCommitValueForFileSets;
+  private final Integer topCommitValueForFileSets;
 
-    private final Integer topCommitValueForFiles;
+  private final Integer topCommitValueForFiles;
 
-    @Singular
-    private final List<Integer> legendLevels;
+  @Singular
+  private final List<Integer> legendLevels;
 }

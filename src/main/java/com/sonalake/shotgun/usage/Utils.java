@@ -33,7 +33,7 @@ public class Utils {
   }
 
 
-  public static String identifyPath(DiffEntry entry, List<String> identifyingPrefixes) {
+  public static CommitEntry identifyPath(DiffEntry entry, List<String> identifyingPrefixes) {
 
     String path = DELETE.equals(entry.getChangeType())
       ? entry.getOldPath()
@@ -41,10 +41,19 @@ public class Utils {
 
     for (String candidate : identifyingPrefixes) {
       if (path.startsWith(candidate)) {
-        return StringUtils.substringAfter(path, candidate);
+        return CommitEntry.builder()
+          .changeType(entry.getChangeType())
+          .sourceSet(candidate)
+          .path(StringUtils.substringAfter(path, candidate))
+          .build();
       }
     }
 
-    return path;
+    return CommitEntry.builder()
+      .changeType(entry.getChangeType())
+      .sourceSet("")
+      .path(path)
+      .build();
   }
+
 }

@@ -38,6 +38,60 @@ calculation of that day's score.
 ![](docs/daily.png)
 
  
+# How to build and use this?
+
+At the moment, it's only a CLI tool, so to build it:
+    
+    ./gradlew build shadowJar
+
+
+And to use it, just pass in `-h` to the fatjar to see the options
+
+    java -jar build/libs/shotgun-all.jar -h
+
+
+The only mandatory option is `-i, --input-dir`
+
+```
+Usage: <main class> [options]
+  Options:
+    -m, --commit-minimum
+      Files and sets with a commit size less than this are ignored
+      Default: 3
+    -cf, --commit-size-file
+      We want the files in the top N counts (this may result in more than N 
+      results) 
+      Default: 40
+    -cs, --commit-size-set
+      We want the sets in the top N counts (this may result in more than N 
+      results) 
+      Default: 10
+    -h, --help
+      Print this help message
+  * -i, --input-dir
+      The working directory, must be a git root directory
+    -o, --output-file
+      The output file location
+      Default: .shotgun/report.html
+    -s, --source-set
+      A source set to split by
+      Default: []
+    -l, --legendLevel
+      add legend level
+      Default: [10, 20, 30, 50, 80, 120]
+
+```    
+
+A sample usage where we want to specify source sets, but otherwise accept the defaults 
+might be:
+
+    java -jar build/libs/shotgun-all.jar \    
+    -i ~/workspaces/enet/billing-validation \
+    -s  "src/main/java" \
+    -s  "src/main/resources" \
+    -s  "src/main/webapp" \
+    -s  "src/test/java" \
+    -s  "src/test/resources" 
 
 # How is shotgun coherency calculated?
 The **shotgun coherency** is a function of how close to each other the files

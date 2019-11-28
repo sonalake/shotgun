@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sonalake.shotgun.usage.Utils.identifyPath;
+import static java.util.stream.Collectors.groupingBy;
 import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
 
 
@@ -48,12 +49,7 @@ public class ShotgunModel implements FileDiffNotifier {
       )
       .score(score(commit, entries))
       .message(commit.getFullMessage())
-      .entries(entries.stream().map(e ->
-        CommitEntry.builder()
-          .path(identifyPath(e, Collections.emptyList()))
-          .changeType(e.getChangeType())
-          .build()
-      ).collect(Collectors.toList()))
+      .entries(entries.stream().map(e ->identifyPath(e, Collections.emptyList())).collect(Collectors.toList()))
       .size(entries.size())
       .build();
 
@@ -64,9 +60,9 @@ public class ShotgunModel implements FileDiffNotifier {
     // the subgraphs will eventually be trees
     DirectedAcyclicGraph<String, DefaultWeightedEdge> graph = new DirectedAcyclicGraph<>(DefaultWeightedEdge.class);
     entries.forEach(entry -> {
-      String path = identifyPath(entry, config.getSourceSets());
+      CommitEntry commitEntry = identifyPath(entry, config.getSourceSets());
 
-      String[] pathElements = StringUtils.split(path, File.separator);
+      String[] pathElements = StringUtils.split(commitEntry.getPath(), File.separator);
 
       String lastElement = null;
       for (int i = 0; i != pathElements.length; i++) {
@@ -94,41 +90,56 @@ public class ShotgunModel implements FileDiffNotifier {
     List<DiffEntry> entries = allEntries.stream()
       .filter(e -> !DELETE.equals(e.getChangeType()))
       .collect(Collectors.toList());
-    if (entries.size() == 1) {
-      return 1.0;
-    }
-
     //
-    Set<String> files = entries.stream().map(e -> identifyPath(e, config.getSourceSets())).collect(Collectors.toSet());
+    Map<String, List<CommitEntry>> filesBySubset =
+      entries.stream().map(e -> identifyPath(e, config.getSourceSets()))
+      .collect(groupingBy(CommitEntry::getSourceSet));
     MutableDouble score = new MutableDouble(0.0);
 
-    DirectedAcyclicGraph<String, DefaultWeightedEdge> graph = buildGraph(entries);
+    filesBySubset.values().forEach(setEntries -> {
+      List<String> files = setEntries.stream().map(CommitEntry::getPath).collect(Collectors.toList());
+      if (files.size() == 1) {
+        score.add(1.0);
+      } else {
+        DirectedAcyclicGraph<String, DefaultWeightedEdge> graph = buildGraph(entries);
 
-    // each subgraph is a distinct tree
-    new ConnectivityInspector<>(graph)
-      .connectedSets()
-      .forEach(subset -> {
+        // each subgraph is a distinct tree
+        new ConnectivityInspector<>(graph)
+          .connectedSets()
+          .forEach(subset -> {
 
-        AsSubgraph<String, DefaultWeightedEdge> subgraph = new AsSubgraph<>(graph, subset);
-        String root = subgraph.vertexSet().stream()
-          .filter(e -> 0 == graph.inDegreeOf(e))
-          .findFirst()
-          .orElseThrow(() -> new IllegalArgumentException("No root found"));
+            AsSubgraph<String, DefaultWeightedEdge> subgraph = new AsSubgraph<>(graph, subset);
+            String root = findRootForTree(subgraph);
 
-        // prune down to only the common changed elements
-        while (graph.outDegreeOf(root) == 1 && !files.contains(root)) {
-          DefaultWeightedEdge edge = subgraph.outgoingEdgesOf(root).iterator().next();
-          String newRoot = subgraph.getEdgeTarget(edge);
-          subgraph.removeVertex(root);
-          root = newRoot;
-        }
+            // prune down to only the common changed elements
+            pruneTreeToCommonLeaves(files, subgraph, root);
 
-        // if there are no edges then we have 1 file and nothing else
-        int edges = subgraph.edgeSet().size();
-        score.add(edges == 0 ? 1 : edges);
-      });
+            // if there are no edges then we have 1 file and nothing else
+            int edges = subgraph.edgeSet().size();
+            score.add(edges == 0 ? 1 : edges);
+          });
+      }
+
+    });
+
 
     return score.doubleValue();
+  }
+
+  private void pruneTreeToCommonLeaves(List<String> files, AsSubgraph<String, DefaultWeightedEdge> subgraph, String root) {
+    while (subgraph.outDegreeOf(root) == 1 && !files.contains(root)) {
+      DefaultWeightedEdge edge = subgraph.outgoingEdgesOf(root).iterator().next();
+      String newRoot = subgraph.getEdgeTarget(edge);
+      subgraph.removeVertex(root);
+      root = newRoot;
+    }
+  }
+
+  private String findRootForTree(AsSubgraph<String, DefaultWeightedEdge> subgraph) {
+    return subgraph.vertexSet().stream()
+              .filter(e -> 0 == subgraph.inDegreeOf(e))
+              .findFirst()
+              .orElseThrow(() -> new IllegalArgumentException("No root found"));
   }
 
 

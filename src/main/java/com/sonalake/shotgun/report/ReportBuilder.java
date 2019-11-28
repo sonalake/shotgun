@@ -8,7 +8,6 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -41,13 +40,30 @@ public class ReportBuilder {
     // make sure the output directory exists
     Files.createDirectories(target.getParent());
 
+    Map<String, String> reportMap = buildReportMap();
+
+    writeReport(target, reportMap);
+  }
+
+  void writeReport(Path target, Map<String, String> reportData) throws IOException, TemplateException {
+    Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+    cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
+    Files.createDirectories(target.getParent());
+    Template template = cfg.getTemplate("report.template.ftl");
+
+    try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+      template.process(reportData, out);
+    }
+  }
+
+  private Map<String, String> buildReportMap() throws IOException {
     Map<Long, Double> heatMap = exportCalendarHeatMap();
     List<? extends Map<String, ?>> commitData = getCommitData();
     List<Map<String, ?>> busySets = getBusySets(config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest());
     List<Map<String, ?>> busyFiles = getBusyFiles(config.getTopCommitValueForFiles(), config.getMinimumCommitInterest());
 
     ObjectMapper mapper = new ObjectMapper();
-    Map<String, String> in = Map.of(
+    return Map.of(
       "repo", config.getInputDirectory().getFileName().toString(),
       "legend", StringUtils.join(config.getLegendLevels(), ","),
       "heatMap", mapper.writeValueAsString(heatMap),
@@ -55,15 +71,6 @@ public class ReportBuilder {
       "busyFiles", mapper.writeValueAsString(busyFiles),
       "commitData", mapper.writeValueAsString(commitData)
     );
-
-    Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
-    cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
-    Files.createDirectories(target.getParent());
-    Template template = cfg.getTemplate("report.template.ftl");
-
-    try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-      template.process(in, out);
-    }
   }
 
   public Map<Long, Double> exportCalendarHeatMap() throws IOException {

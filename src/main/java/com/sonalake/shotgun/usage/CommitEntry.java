@@ -9,6 +9,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 @Builder
 @RequiredArgsConstructor
 public class CommitEntry {
+  private final String sourceSet;
   private final String path;
   private final DiffEntry.ChangeType changeType;
 }
