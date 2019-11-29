@@ -13,8 +13,10 @@ buildscript {
   ext {
     lombokVersion = '1.18.4'
   }
+  dependencies {
+    classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+  }
 }
-
 
 
 plugins {
@@ -31,7 +33,9 @@ plugins {
 
 }
 apply from: "gradle/sonar.gradle"
-
+// for publication to nexus
+apply plugin: 'maven-publish'
+apply plugin: 'maven-publish-auth'
 
 repositories {
   // Use jcenter for resolving dependencies.
@@ -83,4 +87,30 @@ application {
 test {
   // Use junit platform for unit tests
   useJUnitPlatform()
+}
+
+publishing {
+  publications {
+    // this is the main java jar
+
+    mavenJava(MavenPublication) {
+      from components.java
+    }
+
+    cli(MavenPublication) {
+      artifact("build/libs/shotgun-${version}-all.jar")
+      pom {
+        description = "CLI uberjar for ${rootProject.name}"
+        artifactId = "${rootProject.name}-cli"
+        packaging = "jar"
+      }
+    }
+  }
+  repositories {
+    maven {
+      def rootUrl = "http://atlanta.sonalake.corp:8081/nexus/content/repositories"
+      name = version.endsWith("SNAPSHOT") ? 'snapshots' : 'releases'
+      url "$rootUrl/$name"
+    }
+  }
 }

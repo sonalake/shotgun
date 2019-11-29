@@ -28,10 +28,18 @@ pipeline {
     }
 
 
-    stage('clean') {
+    stage('build and test') {
       steps {
-        sh "chmod +x gradlew"
-        sh "./gradlew clean build shadowjar"
+        script {
+          try {
+              sh "chmod +x gradlew"
+              sh "./gradlew clean build"
+          } catch(err) {
+              throw err
+          } finally {
+              junit '**/build/test-results/TESTS-*.xml'
+          }
+        }
       }
     }
 
@@ -40,6 +48,12 @@ pipeline {
       steps {
         // the tests are already run in the previous steps
         sh "./gradlew sonarqube"
+      }
+    }
+
+    stage ('package and release') {
+      steps {
+        sh "./gradlew shadowJar publish"
       }
     }
 
