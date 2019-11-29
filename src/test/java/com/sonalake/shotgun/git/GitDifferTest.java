@@ -1,7 +1,14 @@
 package com.sonalake.shotgun.git;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,8 +21,10 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.jgit.diff.DiffEntry.DEV_NULL;
+import static org.eclipse.jgit.lib.Constants.OBJ_TREE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class GitDifferTest {
 
@@ -30,6 +39,48 @@ public class GitDifferTest {
           })
     );
     assertEquals("No git repo in: " + workingDir, observed.getMessage());
+  }
+
+  @Test
+  public void testGitError(@TempDir Path workingDir) throws IOException {
+
+    GitDiffer differ = GitDiffer.builder()
+      .workingDirectory(workingDir)
+      .build();
+
+    // given we have some git repo
+    Git git = mock(Git.class);
+    Repository repo = mock(Repository.class);
+    when(git.getRepository()).thenReturn(repo);
+    ObjectReader reader = mock(ObjectReader.class);
+    when(git.getRepository().newObjectReader()).thenReturn(reader);
+
+    // but that opening a reader has some error
+    doThrow(new IOException("Oh noes")).when(reader).open(any(AnyObjectId.class), eq(OBJ_TREE));
+
+    // when we try to diff these commits
+    RevCommit commit = commit();
+    RevCommit parent = commit();
+    GitException observed = assertThrows(GitException.class,
+      () -> differ.manageDiffs(git, commit, parent, new FileDiffNotifier[0])
+    );
+
+    // the error is as expected
+    assertEquals(
+      "Failed to get diff between " + parent + " and " + commit
+      , observed.getMessage()
+    );
+    assertEquals(
+      "Oh noes"
+      , observed.getCause().getMessage()
+    );
+  }
+
+  private RevCommit commit() {
+    RevCommit commit = mock(RevCommit.class);
+    when(commit.getTree()).thenReturn(mock(RevTree.class));
+    when(commit.getTree().getId()).thenReturn(new ObjectId(1, 2, 3, 4, 5));
+    return commit;
   }
 
   @Test

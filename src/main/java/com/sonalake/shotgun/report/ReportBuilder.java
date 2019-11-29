@@ -48,20 +48,20 @@ public class ReportBuilder {
   }
 
 
-  public void export(Path target) {
+  public void export(String templateName, Path target) {
     Map<String, String> reportMap = buildReportMap();
 
-    writeReport(target, reportMap);
+    writeReport(templateName, target, reportMap);
   }
 
-  private void writeReport(Path target, Map<String, String> reportData) {
+  private void writeReport(String templateName, Path target, Map<String, String> reportData) {
 
 
     try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
       Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
       cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
       Files.createDirectories(target.getParent());
-      Template template = cfg.getTemplate("report.template.ftl");
+      Template template = cfg.getTemplate(templateName);
 
       template.process(reportData, out);
     } catch (IOException | TemplateException e) {

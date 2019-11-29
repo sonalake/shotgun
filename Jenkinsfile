@@ -24,7 +24,6 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
-
       }
     }
 
@@ -40,12 +39,11 @@ pipeline {
     stage ('quality analysis') {
       steps {
         // the tests are already run in the previous steps
-        sh "./gradlew sonarqube --no-daemon"
+        sh "./gradlew sonarqube"
       }
     }
 
   }
-
 
 
 }

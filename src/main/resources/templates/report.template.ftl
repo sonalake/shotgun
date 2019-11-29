@@ -74,7 +74,7 @@
 
   <div id="commit-details" style="display:none">
     <div id="commit-summary"></div>
-    <table class="table table-sm" >
+    <table class="table table-sm">
       <thead>
       <tr>
         <th scope="col">Score</th>
@@ -107,6 +107,7 @@
 <#include "report.js" parse=false>
 
 -->
+
 
 
 
