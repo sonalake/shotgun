@@ -3,17 +3,14 @@ package com.sonalake.shotgun.report;
 import com.sonalake.shotgun.usage.CommitEntry;
 import com.sonalake.shotgun.usage.CommitShotgun;
 import com.sonalake.shotgun.usage.ShotgunConfig;
-import freemarker.template.TemplateException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReportBuilderTest {
 
   @Test
-  public void testAggregation(@TempDir Path out)  {
+  public void testAggregation(@TempDir Path out) {
 
     ShotgunConfig config = ShotgunConfig.builder()
       .outputFile(out.resolve("out.html"))
@@ -64,25 +61,22 @@ public class ReportBuilderTest {
     assertEquals(5, builder.exportCalendarHeatMap().get(epochSecond(1976, 8, 29)));
 
     // assert busy files
-    List<? extends Map<String, ?>> files = builder.getBusyFiles(
+    List<BusyFile> files = builder.getBusyFiles(
       config.getTopCommitValueForFiles(), config.getMinimumCommitInterest()
     );
     assertEquals(asList(
-      Map.of("count", 6, "file", "a"),
-      Map.of("count", 4, "file", "b"),
-      Map.of("count", 4, "file", "c")
-      ),
+      BusyFile.builder().count(6).file("a").build(),
+      BusyFile.builder().count(4).file("b").build(),
+      BusyFile.builder().count(4).file("c").build()),
       files
     );
 
 
     // assert busy sets
-    List<? extends Map<String, ?>> sets = builder.getBusySets(
+    List<BusySet> sets = builder.getBusySets(
       config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest()
     );
-    assertEquals(asList(
-      Map.of("count", 3, "files", asList("b", "c"))
-      ),
+    assertEquals(asList(BusySet.builder().count(3).files(asList("b", "c")).build()),
       sets
     );
 

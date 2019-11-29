@@ -76,8 +76,7 @@ public class GitDiffer {
    * @param notifiers the notifiers at which the diffs are being fired
    */
   private void manageDiffs(Git git, RevCommit commit, RevCommit parent, FileDiffNotifier[] notifiers) {
-    try {
-      ObjectReader reader = git.getRepository().newObjectReader();
+    try (ObjectReader reader = git.getRepository().newObjectReader()){
 
       // the old tree is based on the parent
       CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();

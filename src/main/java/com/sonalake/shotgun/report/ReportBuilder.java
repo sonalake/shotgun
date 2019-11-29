@@ -1,6 +1,7 @@
 package com.sonalake.shotgun.report;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sonalake.shotgun.usage.CommitEntry;
 import com.sonalake.shotgun.usage.CommitShotgun;
 import com.sonalake.shotgun.usage.ShotgunConfig;
@@ -76,11 +77,12 @@ public class ReportBuilder {
   private Map<String, String> buildReportMap() {
     try {
       Map<Long, Double> heatMap = exportCalendarHeatMap();
-      List<? extends Map<String, ?>> commitData = getCommitData();
-      List<Map<String, ?>> busySets = getBusySets(config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest());
-      List<Map<String, ?>> busyFiles = getBusyFiles(config.getTopCommitValueForFiles(), config.getMinimumCommitInterest());
+      List<CollatedDay> commitData = getCommitData();
+      List<BusySet> busySets = getBusySets(config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest());
+      List<BusyFile> busyFiles = getBusyFiles(config.getTopCommitValueForFiles(), config.getMinimumCommitInterest());
 
       ObjectMapper mapper = new ObjectMapper();
+      mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
       return Map.of(
         REPO, config.getInputDirectory().getFileName().toString(),
         LEGEND, StringUtils.join(config.getLegendLevels(), ","),
@@ -138,7 +140,7 @@ public class ReportBuilder {
    *
    * @return
    */
-  List<Map<String, ?>> getCommitData() {
+  List<CollatedDay> getCommitData() {
     return commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
       .entrySet()
@@ -163,7 +165,7 @@ public class ReportBuilder {
    * @param lowerLimit
    * @return
    */
-  List<Map<String, ?>> getBusyFiles(int top, int lowerLimit) {
+  List<BusyFile> getBusyFiles(int top, int lowerLimit) {
     Map<String, Integer> fileCounts = new HashMap<>();
 
     commitScores.forEach(commit -> commit.getEntries().stream()
@@ -188,10 +190,7 @@ public class ReportBuilder {
     return fileCounts.entrySet().stream()
       .filter(e -> e.getValue() >= lowWaterMark)
       .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-      .map(e -> Map.of(
-        "count", e.getValue(),
-        "file", e.getKey()
-      ))
+      .map(e -> BusyFile.builder().count(e.getValue()).file(e.getKey()).build())
       .collect(Collectors.toList());
   }
 
@@ -213,7 +212,7 @@ public class ReportBuilder {
    * @param lowerLimit
    * @return
    */
-  List<Map<String, ?>> getBusySets(int top, int lowerLimit) {
+  List<BusySet> getBusySets(int top, int lowerLimit) {
     Map<List<String>, Integer> setCounts = new HashMap<>();
     commitScores.stream().filter(e -> e.getEntries().size() > 1).forEach(commit -> {
       List<String> key = commit.getEntries().stream().map(CommitEntry::getFullPath).collect(Collectors.toList());
@@ -240,10 +239,7 @@ public class ReportBuilder {
       .filter(e -> e.getValue() >= lowWaterMark)
       .filter(e -> e.getValue() >= lowerLimit)
       .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-      .map(e -> Map.of(
-        "count", e.getValue(),
-        "files", e.getKey()
-      ))
+      .map(e -> BusySet.builder().count(e.getValue()).files(e.getKey()).build())
       .collect(Collectors.toList());
   }
 
@@ -279,14 +275,15 @@ public class ReportBuilder {
    * @param commits
    * @return
    */
-  private Map<String, ?> collateDay(LocalDate date, List<CommitShotgun> commits) {
+  private CollatedDay collateDay(LocalDate date, List<CommitShotgun> commits) {
     Double score = median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()));
-    return Map.of(
-      "date", date.format(DateTimeFormatter.ISO_LOCAL_DATE),
-      "epochSecond", date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond(),
-      "score", score == null ? "n/a" : score,
-      "commits", commits.stream().sorted(Comparator.comparing(CommitShotgun::getScore).reversed()).collect(Collectors.toList())
-    );
+    return CollatedDay.builder()
+      .date(date.format(DateTimeFormatter.ISO_LOCAL_DATE))
+      .epochSecond(date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond())
+      .score(score == null ? "n/a" : score.toString())
+      .commits(commits.stream().sorted(Comparator.comparing(CommitShotgun::getScore).reversed()).collect(Collectors.toList()))
+      .build();
+
   }
 
 }
