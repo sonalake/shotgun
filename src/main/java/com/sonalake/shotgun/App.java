@@ -17,34 +17,37 @@ import java.io.IOException;
 
 @Slf4j
 public class App {
-    public static void main(String[] args) throws GitAPIException, IOException, TemplateException {
-        Params params = new Params();
-        JCommander parser = JCommander.newBuilder()
-                .addObject(params)
-                .build();
-        parser.parse(args);
+  public static void main(String[] args) throws GitAPIException, IOException, TemplateException {
+    Params params = new Params();
+    JCommander parser = JCommander.newBuilder()
+      .addObject(params)
+      .build();
 
-        if (params.isHelp()) {
-            parser.usage();
-
-        } else {
-            new App().process(params.toConfig());
-        }
+    if (args.length == 0) {
+      parser.usage();
+    } else {
+      parser.parse(args);
+      if (params.isHelp()) {
+        parser.usage();
+      } else {
+        new App().process(params.toConfig());
+      }
     }
+  }
 
-    public void process(ShotgunConfig config) throws GitAPIException, IOException, TemplateException {
-        ShotgunModel shotgunModel = new ShotgunModel(config);
+  public void process(ShotgunConfig config) throws GitAPIException, IOException, TemplateException {
+    ShotgunModel shotgunModel = new ShotgunModel(config);
 
-        GitDiffer.builder()
-                .workingDirectory(config.getInputDirectory())
-                .build()
-                .scanRepo(shotgunModel);
+    GitDiffer.builder()
+      .workingDirectory(config.getInputDirectory())
+      .build()
+      .scanRepo(shotgunModel);
 
 
-        new ReportBuilder(shotgunModel.getScores(), config)
-                .export(config.getOutputFile());
+    new ReportBuilder(shotgunModel.getScores(), config)
+      .export(config.getOutputFile());
 
-        log.info("Report written to {}", config.getOutputFile());
+    log.info("Report written to {}", config.getOutputFile());
 
-    }
+  }
 }

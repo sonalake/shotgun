@@ -40,7 +40,7 @@
         </div>
         <small class="text-muted">These are the sets of files committed most often, ignoring sets that are too
           small</small>
-        <table class="table">
+        <table class="table table-sm">
           <thead>
           <tr>
             <th scope="col">Count</th>
@@ -56,7 +56,7 @@
           Active Files
         </div>
         <small class="text-muted">These are the files committed most often</small>
-        <table class="table">
+        <table class="table table-sm">
           <thead>
           <tr>
             <th scope="col">Count</th>
@@ -74,7 +74,7 @@
 
   <div id="commit-details" style="display:none">
     <div id="commit-summary"></div>
-    <table class="table">
+    <table class="table table-sm" >
       <thead>
       <tr>
         <th scope="col">Score</th>

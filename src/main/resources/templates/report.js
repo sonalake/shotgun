@@ -32,12 +32,31 @@
               <br/><small class="text-muted">${commit.message}</small>
               </td></tr>
             `);
-            const files = $(`<td></td>`);
+
+            const commitFileTable = $(`
+                <table class="table table-sm">
+                  <thead>
+                  <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Source Set</th>
+                    <th scope="col">File</th>
+                  </tr>
+                  </thead>
+                </table>`);
+
+
+            const files = $(`<tbody></tbody>`);
+
             for (f in commit.entries) {
               const file = commit.entries[f];
-              files.append(`<li><small class="text-muted">${file.changeType} - ${file.path}</small></li>`);
+              files.append(`<tr>
+              <td><small class="text-muted">${file.changeType}</small></td>
+              <td><small class="text-muted">${file.sourceSet}</small></td>
+              <td><small class="text-muted">${file.path}</small></td>
+              </tr>`);
             }
-            row.append(files)
+            commitFileTable.append(files)
+            row.append($('<td>').append(commitFileTable));
             $('#commit-log').append(row)
           }
           return;

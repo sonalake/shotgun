@@ -27,6 +27,10 @@ import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.groupingBy;
 import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
 
+/**
+ * Build the HTML report.
+ *
+ */
 public class ReportBuilder {
 
   static final String REPO = "repo";
@@ -64,6 +68,11 @@ public class ReportBuilder {
     }
   }
 
+  /**
+   * Builds the overall map
+   * @return
+   * @throws IOException
+   */
   private Map<String, String> buildReportMap() throws IOException {
     Map<Long, Double> heatMap = exportCalendarHeatMap();
     List<? extends Map<String, ?>> commitData = getCommitData();
@@ -81,6 +90,12 @@ public class ReportBuilder {
     );
   }
 
+
+  /**
+   * Builds a map from epochDay -> score for that day
+   * @return
+   * @throws IOException
+   */
   Map<Long, Double> exportCalendarHeatMap() throws IOException {
     // group the commits by date
     Map<Long, Double> data = new TreeMap<>();
@@ -97,6 +112,29 @@ public class ReportBuilder {
   }
 
 
+  /**
+   * Builds a history  as a list of
+   *
+   * <pre>
+   *   {@code
+   *   {
+   *         "committer": "daniel.bray@sonalake.com",
+   *         "commit": "c42b2234364f388c5c3c9d3d3f1428b2bc47979f",
+   *         "message": "update jenkins process\n",
+   *         "score": 10.0,
+   *         "size": 9,
+   *         "entries": [
+   *           {
+   *             "sourceSet": "",
+   *             "path": ".java-version",
+   *             "changeType": "ADD"
+   *           }
+   *         ]
+   *       }
+   *   }
+   * </pre>
+   * @return
+   */
   List<? extends Map<String, ?>> getCommitData() {
     return commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
@@ -107,6 +145,20 @@ public class ReportBuilder {
       .collect(Collectors.toList());
   }
 
+  /**
+   * Builds a list of busy files in the format
+   * <pre>
+   *   {@code
+   *    {
+   *       "file": "src/app/i18n/locale-data/en.json",
+   *       "count": 554
+   *     }
+   *   }
+   * </pre>
+   * @param top
+   * @param lowerLimit
+   * @return
+   */
   List<Map<String, ?>> getBusyFiles(int top, int lowerLimit) {
     Map<String, Integer> fileCounts = new HashMap<>();
 
@@ -114,8 +166,8 @@ public class ReportBuilder {
       commit.getEntries().stream()
         .filter(e->!DELETE.equals(e.getChangeType()))
         .forEach(entry -> {
-          Integer count = fileCounts.getOrDefault(entry.getPath(), 0);
-          fileCounts.put(entry.getPath(), ++count);
+          Integer count = fileCounts.getOrDefault(entry.getFullPath(), 0);
+          fileCounts.put(entry.getFullPath(), ++count);
         });
     });
 
@@ -141,10 +193,27 @@ public class ReportBuilder {
       .collect(Collectors.toList());
   }
 
+  /**
+   * Build a list of busy sets in the format
+   * <pre>
+   *   {@code
+   *    {
+   *       "files": [
+   *         "package-lock.json",
+   *         "package.json"
+   *       ],
+   *       "count": 90
+   *     }
+   *   }
+   * </pre>
+   * @param top
+   * @param lowerLimit
+   * @return
+   */
   List<Map<String, ?>> getBusySets(int top, int lowerLimit) {
     Map<List<String>, Integer> setCounts = new HashMap<>();
     commitScores.stream().filter(e -> e.getEntries().size() > 1).forEach(commit -> {
-      List<String> key = commit.getEntries().stream().map(CommitEntry::getPath).collect(Collectors.toList());
+      List<String> key = commit.getEntries().stream().map(CommitEntry::getFullPath).collect(Collectors.toList());
       Integer current = setCounts.getOrDefault(key, 0);
       setCounts.put(key, current + 1);
     });
@@ -175,6 +244,37 @@ public class ReportBuilder {
       .collect(Collectors.toList());
   }
 
+  /**
+   * Collate the list of commits for a given day, into the commit score model for that day, i.e.
+   *
+   * <pre>
+   *   {@code
+   *   {
+   *    {
+   *   "date": "2019-07-22",
+   *   "score": 2.0,
+   *   "commits": [
+   *     {
+   *       "committer": "hubert.dolny@sonalake.com",
+   *       "commit": "f7e459797ae9daf1ed389df3e023902c2f0ae4ff",
+   *       "message": "Initial Jhipster application\n",
+   *       "score": 2166.0,
+   *       "size": 276,
+   *       "entries": [
+   *         {
+   *           "sourceSet": "",
+   *           "path": ".gitattributes",
+   *           "changeType": "ADD"
+   *     }
+   *   ],
+   *   "epochSecond": 1563750000
+   * }
+   *   }
+   * </pre>
+   * @param date
+   * @param commits
+   * @return
+   */
   private Map<String, ?> collateDay(LocalDate date, List<CommitShotgun> commits) {
     Double score = median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()));
     return Map.of(

@@ -13,9 +13,9 @@ buildscript {
   ext {
     lombokVersion = '1.18.4'
   }
-
-
 }
+
+
 
 plugins {
   // Apply the java plugin to add support for Java
@@ -35,6 +35,8 @@ repositories {
   jcenter()
 }
 
+group = "com.sonalake"
+version = "1.0.0-SNAPSHOT"
 
 dependencies {
   // This dependency is used by the application.

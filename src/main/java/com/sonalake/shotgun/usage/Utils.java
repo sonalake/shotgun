@@ -17,6 +17,11 @@ import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
 public class Utils {
 
 
+  /**
+   * Calculate the median
+   * @param values a collection of doubles - any nulls are ignored
+   * @return null if there are no values, or else the median
+   */
   public static Double median(Collection<Double> values) {
     List<Double> scores = values.stream().filter(Objects::nonNull).collect(Collectors.toList());
     if (scores.isEmpty()) {
@@ -33,6 +38,12 @@ public class Utils {
   }
 
 
+  /**
+   * Identify the commit entry for the path
+   * @param entry the input entry
+   * @param identifyingPrefixes the available source sets
+   * @return the defined commit entry
+   */
   public static CommitEntry identifyPath(DiffEntry entry, List<String> identifyingPrefixes) {
 
     String path = DELETE.equals(entry.getChangeType())

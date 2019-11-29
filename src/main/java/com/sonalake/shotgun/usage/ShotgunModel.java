@@ -49,7 +49,7 @@ public class ShotgunModel implements FileDiffNotifier {
       )
       .score(score(commit, entries))
       .message(commit.getFullMessage())
-      .entries(entries.stream().map(e ->identifyPath(e, Collections.emptyList())).collect(Collectors.toList()))
+      .entries(entries.stream().map(e ->identifyPath(e, config.getSourceSets())).collect(Collectors.toList()))
       .size(entries.size())
       .build();
 

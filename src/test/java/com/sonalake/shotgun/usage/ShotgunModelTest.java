@@ -268,7 +268,7 @@ public class ShotgunModelTest {
     Map<DiffEntry.ChangeType, List<String>> observedFiles = new TreeMap<>();
     observed.getEntries().forEach(e -> {
       List<String> filesByType = observedFiles.getOrDefault(e.getChangeType(), new ArrayList<>());
-      filesByType.add(e.getPath());
+      filesByType.add(e.getSourceSet() + e.getPath());
       Collections.sort(filesByType);
       observedFiles.put(e.getChangeType(), filesByType);
 

@@ -86,12 +86,7 @@ A sample usage where we want to specify source sets, but otherwise accept the de
 might be:
 
     java -jar build/libs/shotgun-all.jar \    
-    -i ~/workspaces/enet/billing-validation \
-    -s  "src/main/java" \
-    -s  "src/main/resources" \
-    -s  "src/main/webapp" \
-    -s  "src/test/java" \
-    -s  "src/test/resources" 
+    -i ~/workspaces/enet/billing-validation 
 
 # How is shotgun coherency calculated?
 The **shotgun coherency** is a function of how close to each other the files

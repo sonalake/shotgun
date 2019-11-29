@@ -8,8 +8,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.primitives.Ints.asList;
-import static java.util.Collections.emptyList;
+import static java.util.Arrays.asList;
+
 
 @Getter
 public class Params {
@@ -23,8 +23,14 @@ public class Params {
   @Parameter(names = {"-o", "--output-file"}, description = "The output file location")
   private String outputFile = ".shotgun/report.html";
 
-  @Parameter(names = {"-s", "--source-set"}, description = "A source set to split by")
-  private List<String> sourceSets = emptyList();
+  @Parameter(names = {"-s", "--source-set"}, description = "A source set to split by, defaults to a gradle standard")
+  private List<String> sourceSets = asList(
+    "src/main/java",
+    "src/main/resources",
+    "src/main/webapp",
+    "src/test/java",
+    "src/test/resources"
+  );
 
   @Parameter(names = {"-m", "--commit-minimum"}, description = "Files and sets with a commit size less than this are ignored")
   private Integer minimumCommitInterest = 3;
