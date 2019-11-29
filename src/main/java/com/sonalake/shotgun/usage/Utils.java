@@ -19,6 +19,7 @@ public class Utils {
 
   /**
    * Calculate the median
+   *
    * @param values a collection of doubles - any nulls are ignored
    * @return null if there are no values, or else the median
    */
@@ -40,7 +41,8 @@ public class Utils {
 
   /**
    * Identify the commit entry for the path
-   * @param entry the input entry
+   *
+   * @param entry               the input entry
    * @param identifyingPrefixes the available source sets
    * @return the defined commit entry
    */

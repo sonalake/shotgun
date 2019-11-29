@@ -19,95 +19,95 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GitDifferTest {
 
-    @Test
-    public void testFileError(@TempDir Path workingDir) throws GitAPIException, IOException {
-        IllegalArgumentException observed = assertThrows(IllegalArgumentException.class,
-                () ->
-                        GitDiffer.builder()
-                                .workingDirectory(workingDir)
-                                .build()
-                                .scanRepo((commit, entries) -> {
-                                })
-        );
-        assertEquals("Can't read repo in: " + workingDir, observed.getMessage());
-    }
-
-    @Test
-    public void testSimpleLog(@TempDir Path workingDir) throws GitAPIException, IOException, InterruptedException {
-        new GitTestHelper(workingDir)
-                .init()
-                .checkout("work")
-                .file("a/b/c", "file1")
-                .commit()
-                .checkout("master").merge("work");
-
-        List<List<DiffEntry>> commits = new ArrayList<>();
-
+  @Test
+  public void testFileError(@TempDir Path workingDir) {
+    GitException observed = assertThrows(GitException.class,
+      () ->
         GitDiffer.builder()
-                .workingDirectory(workingDir)
-                .build()
-                .scanRepo((commit, entries) -> commits.add(entries));
+          .workingDirectory(workingDir)
+          .build()
+          .scanRepo((commit, entries) -> {
+          })
+    );
+    assertEquals("No git repo in: " + workingDir, observed.getMessage());
+  }
 
-        List<List<String>> simpleHistory = commits.stream()
-                .map(e -> e.stream().map(v -> v.getChangeType() + ": " + pathOf(v)).collect(Collectors.toList()))
-                .collect(Collectors.toList());
+  @Test
+  public void testSimpleLog(@TempDir Path workingDir) throws GitAPIException, IOException, InterruptedException {
+    new GitTestHelper(workingDir)
+      .init()
+      .checkout("work")
+      .file("a/b/c", "file1")
+      .commit()
+      .checkout("master").merge("work");
 
-        assertEquals(singletonList(singletonList("ADD: a/b/c/file1")), simpleHistory);
+    List<List<DiffEntry>> commits = new ArrayList<>();
 
-    }
+    GitDiffer.builder()
+      .workingDirectory(workingDir)
+      .build()
+      .scanRepo((commit, entries) -> commits.add(entries));
+
+    List<List<String>> simpleHistory = commits.stream()
+      .map(e -> e.stream().map(v -> v.getChangeType() + ": " + pathOf(v)).collect(Collectors.toList()))
+      .collect(Collectors.toList());
+
+    assertEquals(singletonList(singletonList("ADD: a/b/c/file1")), simpleHistory);
+
+  }
 
 
-    @Test
-    public void testUpdatesAndDeletes(@TempDir Path workingDir) throws GitAPIException, IOException, InterruptedException {
-        GitTestHelper git = new GitTestHelper(workingDir).init();
+  @Test
+  public void testUpdatesAndDeletes(@TempDir Path workingDir) throws GitAPIException, IOException, InterruptedException {
+    GitTestHelper git = new GitTestHelper(workingDir).init();
 
 // add a file on a branch and merge it to master
-        git.checkout("work")
-                .file("a/b/c", "file1")
-                .commit()
-                .checkout("master").merge("work");
+    git.checkout("work")
+      .file("a/b/c", "file1")
+      .commit()
+      .checkout("master").merge("work");
 
 // edit a file and add a file on some branch and then merge it to master
 
-        git.checkout("work2")
-                .file("a/b/c", "file1")
-                .file("a/b/c", "file2")
-                .commit()
-                .checkout("master").merge("work2");
+    git.checkout("work2")
+      .file("a/b/c", "file1")
+      .file("a/b/c", "file2")
+      .commit()
+      .checkout("master").merge("work2");
 
 // edit a file on some branch, and delte a file, and then merge it to master
 
-        git.checkout("work3")
-                .file("a/b/c", "file1")
-                .delete("a/b/c", "file2")
-                .commit()
-                .checkout("master").merge("work3");
+    git.checkout("work3")
+      .file("a/b/c", "file1")
+      .delete("a/b/c", "file2")
+      .commit()
+      .checkout("master").merge("work3");
 
-        List<List<DiffEntry>> commits = new ArrayList<>();
+    List<List<DiffEntry>> commits = new ArrayList<>();
 
-        GitDiffer.builder()
-                .workingDirectory(workingDir)
-                .build()
-                .scanRepo((commit, entries) -> commits.add(entries));
+    GitDiffer.builder()
+      .workingDirectory(workingDir)
+      .build()
+      .scanRepo((commit, entries) -> commits.add(entries));
 
 
-        List<List<String>> simpleHistory = commits.stream()
-                .map(e -> e.stream().map(v -> v.getChangeType() + ": " + pathOf(v)).collect(Collectors.toList()))
-                .collect(Collectors.toList());
+    List<List<String>> simpleHistory = commits.stream()
+      .map(e -> e.stream().map(v -> v.getChangeType() + ": " + pathOf(v)).collect(Collectors.toList()))
+      .collect(Collectors.toList());
 
-        assertEquals(asList(
-                asList("MODIFY: a/b/c/file1", "DELETE: a/b/c/file2"),
-                asList("MODIFY: a/b/c/file1", "ADD: a/b/c/file2"),
-                singletonList("ADD: a/b/c/file1")
-        ), simpleHistory);
+    assertEquals(asList(
+      asList("MODIFY: a/b/c/file1", "DELETE: a/b/c/file2"),
+      asList("MODIFY: a/b/c/file1", "ADD: a/b/c/file2"),
+      singletonList("ADD: a/b/c/file1")
+    ), simpleHistory);
 
+  }
+
+
+  private String pathOf(DiffEntry e) {
+    if (!e.getNewPath().equals(DEV_NULL)) {
+      return e.getNewPath();
     }
-
-
-    private String pathOf(DiffEntry e) {
-        if (!e.getNewPath().equals(DEV_NULL)) {
-            return e.getNewPath();
-        }
-        return e.getOldPath();
-    }
+    return e.getOldPath();
+  }
 }

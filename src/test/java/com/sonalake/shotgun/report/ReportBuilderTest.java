@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReportBuilderTest {
 
   @Test
-  public void testAggregation(@TempDir Path out) throws IOException, TemplateException {
+  public void testAggregation(@TempDir Path out)  {
 
     ShotgunConfig config = ShotgunConfig.builder()
       .outputFile(out.resolve("out.html"))

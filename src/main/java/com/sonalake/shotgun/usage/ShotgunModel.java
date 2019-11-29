@@ -49,7 +49,7 @@ public class ShotgunModel implements FileDiffNotifier {
       )
       .score(score(commit, entries))
       .message(commit.getFullMessage())
-      .entries(entries.stream().map(e ->identifyPath(e, config.getSourceSets())).collect(Collectors.toList()))
+      .entries(entries.stream().map(e -> identifyPath(e, config.getSourceSets())).collect(Collectors.toList()))
       .size(entries.size())
       .build();
 
@@ -73,10 +73,9 @@ public class ShotgunModel implements FileDiffNotifier {
         if (!graph.containsVertex(element)) {
           graph.addVertex(element);
         }
-        if (null != lastElement && !Objects.equals(element, lastElement)) {
-          if (!graph.containsEdge(lastElement, element)) {
-            graph.addEdge(lastElement, element);
-          }
+        boolean isTheLastElementDifferent = null != lastElement && !Objects.equals(element, lastElement);
+        if (isTheLastElementDifferent && !graph.containsEdge(lastElement, element)) {
+          graph.addEdge(lastElement, element);
         }
 
         lastElement = element;
@@ -87,13 +86,14 @@ public class ShotgunModel implements FileDiffNotifier {
 
   private Double score(RevCommit commit, List<DiffEntry> allEntries) {
     // we ignore deleted entries when we score
+    log.debug("Scoring commit {}", commit.getId());
     List<DiffEntry> entries = allEntries.stream()
       .filter(e -> !DELETE.equals(e.getChangeType()))
       .collect(Collectors.toList());
     //
     Map<String, List<CommitEntry>> filesBySubset =
       entries.stream().map(e -> identifyPath(e, config.getSourceSets()))
-      .collect(groupingBy(CommitEntry::getSourceSet));
+        .collect(groupingBy(CommitEntry::getSourceSet));
     MutableDouble score = new MutableDouble(0.0);
 
     filesBySubset.values().forEach(setEntries -> {
@@ -137,9 +137,9 @@ public class ShotgunModel implements FileDiffNotifier {
 
   private String findRootForTree(AsSubgraph<String, DefaultWeightedEdge> subgraph) {
     return subgraph.vertexSet().stream()
-              .filter(e -> 0 == subgraph.inDegreeOf(e))
-              .findFirst()
-              .orElseThrow(() -> new IllegalArgumentException("No root found"));
+      .filter(e -> 0 == subgraph.inDegreeOf(e))
+      .findFirst()
+      .orElseThrow(() -> new IllegalArgumentException("No root found"));
   }
 
 

@@ -29,7 +29,6 @@ import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
 
 /**
  * Build the HTML report.
- *
  */
 public class ReportBuilder {
 
@@ -48,65 +47,68 @@ public class ReportBuilder {
   }
 
 
-  public void export(Path target) throws IOException, TemplateException {
-    // make sure the output directory exists
-    Files.createDirectories(target.getParent());
-
+  public void export(Path target) {
     Map<String, String> reportMap = buildReportMap();
 
     writeReport(target, reportMap);
   }
 
-  private void writeReport(Path target, Map<String, String> reportData) throws IOException, TemplateException {
-    Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
-    cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
-    Files.createDirectories(target.getParent());
-    Template template = cfg.getTemplate("report.template.ftl");
+  private void writeReport(Path target, Map<String, String> reportData) {
+
 
     try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+      Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+      cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
+      Files.createDirectories(target.getParent());
+      Template template = cfg.getTemplate("report.template.ftl");
+
       template.process(reportData, out);
+    } catch (IOException | TemplateException e) {
+      throw new AnalysisException("Failed to create report in " + target, e);
     }
   }
 
   /**
    * Builds the overall map
+   *
    * @return
-   * @throws IOException
    */
-  private Map<String, String> buildReportMap() throws IOException {
-    Map<Long, Double> heatMap = exportCalendarHeatMap();
-    List<? extends Map<String, ?>> commitData = getCommitData();
-    List<Map<String, ?>> busySets = getBusySets(config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest());
-    List<Map<String, ?>> busyFiles = getBusyFiles(config.getTopCommitValueForFiles(), config.getMinimumCommitInterest());
+  private Map<String, String> buildReportMap() {
+    try {
+      Map<Long, Double> heatMap = exportCalendarHeatMap();
+      List<? extends Map<String, ?>> commitData = getCommitData();
+      List<Map<String, ?>> busySets = getBusySets(config.getTopCommitValueForFileSets(), config.getMinimumCommitInterest());
+      List<Map<String, ?>> busyFiles = getBusyFiles(config.getTopCommitValueForFiles(), config.getMinimumCommitInterest());
 
-    ObjectMapper mapper = new ObjectMapper();
-    return Map.of(
-      REPO, config.getInputDirectory().getFileName().toString(),
-      LEGEND, StringUtils.join(config.getLegendLevels(), ","),
-      HEAT_MAP, mapper.writeValueAsString(heatMap),
-      BUSY_SETS, mapper.writeValueAsString(busySets),
-      BUSY_FILES, mapper.writeValueAsString(busyFiles),
-      COMMIT_DATA, mapper.writeValueAsString(commitData)
-    );
+      ObjectMapper mapper = new ObjectMapper();
+      return Map.of(
+        REPO, config.getInputDirectory().getFileName().toString(),
+        LEGEND, StringUtils.join(config.getLegendLevels(), ","),
+        HEAT_MAP, mapper.writeValueAsString(heatMap),
+        BUSY_SETS, mapper.writeValueAsString(busySets),
+        BUSY_FILES, mapper.writeValueAsString(busyFiles),
+        COMMIT_DATA, mapper.writeValueAsString(commitData)
+      );
+    } catch (IOException e) {
+      throw new AnalysisException("Failed to build report model", e);
+    }
   }
 
 
   /**
    * Builds a map from epochDay -> score for that day
+   *
    * @return
-   * @throws IOException
    */
-  Map<Long, Double> exportCalendarHeatMap() throws IOException {
+  Map<Long, Double> exportCalendarHeatMap() {
     // group the commits by date
     Map<Long, Double> data = new TreeMap<>();
     commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
-      .forEach((date, commits) -> {
-        data.put(
-          date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond(),
-          median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()))
-        );
-      });
+      .forEach((date, commits) -> data.put(
+        date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond(),
+        median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()))
+      ));
 
     return data;
   }
@@ -133,9 +135,10 @@ public class ReportBuilder {
    *       }
    *   }
    * </pre>
+   *
    * @return
    */
-  List<? extends Map<String, ?>> getCommitData() {
+  List<Map<String, ?>> getCommitData() {
     return commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
       .entrySet()
@@ -155,6 +158,7 @@ public class ReportBuilder {
    *     }
    *   }
    * </pre>
+   *
    * @param top
    * @param lowerLimit
    * @return
@@ -162,18 +166,16 @@ public class ReportBuilder {
   List<Map<String, ?>> getBusyFiles(int top, int lowerLimit) {
     Map<String, Integer> fileCounts = new HashMap<>();
 
-    commitScores.forEach(commit -> {
-      commit.getEntries().stream()
-        .filter(e->!DELETE.equals(e.getChangeType()))
-        .forEach(entry -> {
-          Integer count = fileCounts.getOrDefault(entry.getFullPath(), 0);
-          fileCounts.put(entry.getFullPath(), ++count);
-        });
-    });
+    commitScores.forEach(commit -> commit.getEntries().stream()
+      .filter(e -> !DELETE.equals(e.getChangeType()))
+      .forEach(entry -> {
+        Integer count = fileCounts.getOrDefault(entry.getFullPath(), 0);
+        fileCounts.put(entry.getFullPath(), ++count);
+      }));
 
     List<Integer> topUniqueValues = new TreeSet<>(fileCounts.values())
       .stream()
-      .filter(i->i>=lowerLimit)
+      .filter(i -> i >= lowerLimit)
       .sorted(reverseOrder())
       .limit(top)
       .collect(Collectors.toList());
@@ -206,6 +208,7 @@ public class ReportBuilder {
    *     }
    *   }
    * </pre>
+   *
    * @param top
    * @param lowerLimit
    * @return
@@ -271,6 +274,7 @@ public class ReportBuilder {
    * }
    *   }
    * </pre>
+   *
    * @param date
    * @param commits
    * @return

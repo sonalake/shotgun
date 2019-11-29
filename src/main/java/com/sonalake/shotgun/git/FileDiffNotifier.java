@@ -14,7 +14,7 @@ public interface FileDiffNotifier {
   /**
    * Notice a new git diff
    *
-   * @param commit The commit details
+   * @param commit  The commit details
    * @param entries The list of entry details
    */
   void noticeDiff(RevCommit commit, List<DiffEntry> entries);
