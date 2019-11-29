@@ -55,15 +55,17 @@ public class ReportBuilder {
   }
 
   private void writeReport(String templateName, Path target, Map<String, String> reportData) {
-
-
-    try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-      Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
-      cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
+    try {
+      // don't try to "fix" this nested try, we need to guarantee the output directory _ before_ we
+      // try to create the file
       Files.createDirectories(target.getParent());
-      Template template = cfg.getTemplate(templateName);
+      try (Writer out = Files.newBufferedWriter(target, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+        cfg.setTemplateLoader(new ClassTemplateLoader(getClass(), "/templates/"));
+        Template template = cfg.getTemplate(templateName);
 
-      template.process(reportData, out);
+        template.process(reportData, out);
+      }
     } catch (IOException | TemplateException e) {
       throw new AnalysisException("Failed to create report in " + target, e);
     }

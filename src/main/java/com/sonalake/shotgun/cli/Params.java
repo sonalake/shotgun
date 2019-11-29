@@ -2,7 +2,7 @@ package com.sonalake.shotgun.cli;
 
 import com.beust.jcommander.Parameter;
 import com.sonalake.shotgun.usage.ShotgunConfig;
-import lombok.Getter;
+import lombok.Data;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 
-@Getter
+@Data
 public class Params {
 
   @Parameter(names = {"-h", "--help"}, help = true, description = "Print this help message")
