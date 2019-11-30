@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -110,7 +110,7 @@ public class ReportBuilder {
     commitScores.stream()
       .collect(groupingBy(CommitShotgun::getCommitDate))
       .forEach((date, commits) -> data.put(
-        date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond(),
+        toLookupDate(date),
         median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()))
       ));
 
@@ -281,11 +281,15 @@ public class ReportBuilder {
     Double score = median(commits.stream().map(CommitShotgun::getScore).collect(Collectors.toList()));
     return CollatedDay.builder()
       .date(date.format(DateTimeFormatter.ISO_LOCAL_DATE))
-      .epochSecond(date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond())
+      .epochSecond(toLookupDate(date))
       .score(score == null ? "n/a" : score.toString())
       .commits(commits.stream().sorted(Comparator.comparing(CommitShotgun::getScore).reversed()).collect(Collectors.toList()))
       .build();
 
+  }
+
+  private long toLookupDate(LocalDate date) {
+    return date.atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond();
   }
 
 }

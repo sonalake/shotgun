@@ -132,3 +132,16 @@ the commits, e.g.
     `edges` of this graph, or if there is only a single file present, the 
     score will be `1`.
 1. The overall score for the commit is the _sum_ of the scores for the source trees.
+
+
+# Thanks to third party libraries
+
+This report embeds a few other libraries into its page, rather than using CDNs, 
+because it makes it easier to ask Jenkins to render this
+
+The libs embedded in the html page are:
+
+- [Bootstrap](https://getbootstrap.com/) for the general presentation
+- [jQuery](https://jquery.com/) for general monkey-business
+- [CalHeatMap](https://cal-heatmap.com/) for the heat map, a [d3](https://d3js.org/) component.
+

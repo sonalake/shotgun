@@ -10,7 +10,7 @@
       $('#commit-summary').empty();
       $('#commit-log').empty();
 
-      const check = date.getTime() / 1000;
+      const check = (date.getTime() / 1000) -  (date.getTimezoneOffset() * 60);
       for (const i in resultData.commitData) {
         const candidate = resultData.commitData[i];
 

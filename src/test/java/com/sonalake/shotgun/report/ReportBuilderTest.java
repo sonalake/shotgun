@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,7 +118,7 @@ public class ReportBuilderTest {
   }
 
   private long epochSecond(int year, int month, int day) {
-    return of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+    return of(year, month, day).atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond();
   }
 
   private CommitShotgun commit(LocalDate day, Double score, String... paths) {

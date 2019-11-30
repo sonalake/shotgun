@@ -3,13 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Project description</title>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.css"/>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script>
+  <!--
+  <#include "jquery-3.4.1.min.js" parse=false>
+   -->
 
+  </script>
+  <script>
+  <!--
+  <#include "d3.v3.min.js" parse=false>
+  -->
+  </script>
+  <script>
+  <!--
+  <#include "cal-heatmap.3.3.10.min.js" parse=false>
+  -->
+  </script>
+  <style> <#include "cal-heatmap.css" parse=false></style>
+  <style> <#include "bootstrap.min.4.3.1.css" parse=false></style>
 
 </head>
 <body>
@@ -103,15 +114,8 @@
       "commitData" : COMMIT_DATA
     }
 
-
 <#include "report.js" parse=false>
-
 -->
-
-
-
-
-
 </script>
 </body>
 </html>
