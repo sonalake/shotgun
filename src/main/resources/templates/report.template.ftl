@@ -29,6 +29,7 @@
 
   <h1>Shotgun Complexity</h1>
   <h2>${repo}</h2>
+  <small class="text-muted">Calculated by <a href="https://bitbucket.org/sonalake/shotgun/src/master/README.md">shotgun</a></small>
 
   <div id="cal-heatmap"></div>
   <small class="text-muted">
