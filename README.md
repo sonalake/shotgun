@@ -4,8 +4,17 @@ _(shoot 'em 'fore they run now)_
 
 ## What does this do?
 
-Performs an analysis of the git history to determine the _"shotgun"_ complexity 
-of an application. This differs from [McCabe's cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity)
+Shotgun spots when feature or bugfixes require large or complex changes to 
+the codebase. These are normally ok at the beginning or even the middle of 
+a project but if they carry on to the end of a project then it indicates that
+the codebase is going to be difficult to maintain.
+
+i.e. _if a lot of fixes require changes all over the place, then your code is
+hard to maintain_
+
+This works by performing an analysis of the git history to determine the _"shotgun"_ complexity 
+(more on this below) of an application. This differs from 
+[McCabe's cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity)
 insofar as it doesn't examine the graph of the underlying code so much as it
 examines the graph of how files get changed over time by examining the git
 history and deriving a score based on the _inter-relatedness_ of the files.
@@ -15,6 +24,8 @@ Perhaps the easiest way to use this is with the [shotgun-gradle-plugin](https://
 
 # Output format
 
+What does this produce?
+
 ## Heatmap and hot spots
 **NOTE:** When deriving the heatmap for a given day, it is the _median_ score for that
 day that is used.
@@ -22,6 +33,7 @@ day that is used.
 ![](docs/hotspot.png)
 
 Where:
+
 * `Active Commit Sets` are those sets of files that are committed at the same time most often.
 * `Active Files` are those files that are committed most often. 
 
@@ -91,8 +103,10 @@ might be:
 There is also a gradle plugin for this: [shotgun-gradle-plugin](https://bitbucket.org/sonalake/shotgun-gradle-plugin/)
 
 # How is shotgun coherency calculated?
-The **shotgun coherency** is a function of how close to each other the files
+
+The **shotgun coherency** score is a function of how close to each other the files
 in a given commit are, where:
+
 * Files in the same directory are considered closer than files in different 
 directories
 * Files in directories directly above/below each other are considered closer than
@@ -101,7 +115,7 @@ files in adjacent directories
 The expected behaviour of a project is that, while there may be lots of changes
 all over the codebase at the start of the project, one would expect that as
 the architecture settles down that any changes that are added are in small
-commits, centered on a small number of packages.
+commits, each centered on a small number of packages.
 
 As a project gets to be more mature, however, if a bugfix or new feature still 
 requires a commit in many different packages, then that points to a need to 
@@ -109,6 +123,7 @@ refactor the codebase to simplify things.
 
 
 ## Deriving the score
+
 A commit's shotgun score is derived as follows:
 
 1. Identify the source tree of each file, e.g.
@@ -119,12 +134,12 @@ A commit's shotgun score is derived as follows:
     * `src/test/resources`
 1. Then, for each of these source trees, determine the lowest common tree for
 the commits, e.g.
-    * For Files (ignoring any `DELETE` entries)
+    * For Files (ignoring any `DELETE` entries - removing code doesn't _add_ to the complexity ;) )
         * `com/sonalake/application/service/BobService.java`
         * `com/sonalake/application/domain/BobRepository.java`
         * `com/sonalake/application/domain/Bob.java`
         * `com/sonalake/application/domain/BobType.java`
-    * Because `com/sonalake//application` is common to all this gets
+    * Because `com/sonalake//application` is common to all of these files, this gets
     simplified to:
         * `application/service/BobService.java`
         * `application/domain/BobRepository.java`
@@ -134,6 +149,11 @@ the commits, e.g.
     `edges` of this graph, or if there is only a single file present, the 
     score will be `1`.
 1. The overall score for the commit is the _sum_ of the scores for the source trees.
+
+Should a given day have multiple commits, then it is the _median_ of that day's scores
+that will be used.
+
+Should a weekend have _any_ commits then management owes the team an apology ;)
 
 
 # Thanks to third party libraries
