@@ -1,11 +1,6 @@
 # Shotgun
 _(shoot 'em 'fore they run now)_
 
-**NOTE:** this is still being put together; if we think it's a good idea I 
-can add a CLI for this, and then a gradle plugin an, who knows, a sonar plugin.
-
-At the moment the project and parameters are hard-coded in 
-[com.sonalake.shotgun.App](src/main/java/com/sonalake/shotgun/App.java)
 
 ## What does this do?
 
@@ -15,6 +10,8 @@ insofar as it doesn't examine the graph of the underlying code so much as it
 examines the graph of how files get changed over time by examining the git
 history and deriving a score based on the _inter-relatedness_ of the files.
 
+
+Perhaps the easiest way to use this is with the [shotgun-gradle-plugin](https://bitbucket.org/sonalake/shotgun-gradle-plugin/)
 
 # Output format
 
@@ -40,7 +37,8 @@ calculation of that day's score.
  
 # How to build and use this?
 
-At the moment, it's only a CLI tool, so to build it:
+## Command line tool
+To build the commandline tool:
     
     ./gradlew build shadowJar
 
@@ -87,6 +85,10 @@ might be:
 
     java -jar build/libs/shotgun-all.jar \    
     -i ~/workspaces/enet/billing-validation 
+
+## Gradle plugin
+
+There is also a gradle plugin for this: [shotgun-gradle-plugin](https://bitbucket.org/sonalake/shotgun-gradle-plugin/)
 
 # How is shotgun coherency calculated?
 The **shotgun coherency** is a function of how close to each other the files
