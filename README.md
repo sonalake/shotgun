@@ -126,6 +126,9 @@ refactor the codebase to simplify things.
 
 A commit's shotgun score is derived as follows:
 
+1. Ignore any commit that is a `merge`: we don't want to risk double-counting, or be at the mercy of whether or not
+the merge was fast-forwarded.
+1. Ignore any `DELETE` entries - removing code doesn't _add_ to the complexity ;)
 1. Identify the source tree of each file, e.g.
     * `src/main/java`
     * `src/main/resources`
@@ -134,7 +137,7 @@ A commit's shotgun score is derived as follows:
     * `src/test/resources`
 1. Then, for each of these source trees, determine the lowest common tree for
 the commits, e.g.
-    * For Files (ignoring any `DELETE` entries - removing code doesn't _add_ to the complexity ;) )
+    * For Files
         * `com/sonalake/application/service/BobService.java`
         * `com/sonalake/application/domain/BobRepository.java`
         * `com/sonalake/application/domain/Bob.java`
