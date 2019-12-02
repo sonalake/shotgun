@@ -10,6 +10,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import java.io.IOException;
@@ -39,7 +40,13 @@ public class GitDiffer {
         .exactRef("refs/heads/" + git.getRepository().getBranch())
         .getObjectId();
 
-      LogCommand getLog = git.log().add(branchId);
+      // we don't include merges because that could double-count
+      // and would also put us a the mercy of whether or not the
+      // merge was fast-forwarded or not
+      LogCommand getLog = git.log()
+        .setRevFilter(RevFilter.NO_MERGES)
+        .add(branchId);
+
       getLog.call().forEach(commit -> {
         log.debug("{} {} {}", commit.getAuthorIdent(), commit, commit.getFullMessage());
         if (commit.getParents().length > 0) {
