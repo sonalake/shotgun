@@ -33,6 +33,7 @@ day that is used.
 ![](docs/hotspot.png)
 
 Where:
+
 * `Active Commit Sets` are those sets of files that are committed at the same time most often.
 * `Active Files` are those files that are committed most often. 
 
