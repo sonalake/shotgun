@@ -110,14 +110,17 @@
     add_busy_files(resultData);
 
       const dates = Object.keys(heatData);
-        let startEpoch = parseInt(dates[0]);
-        let endEpoch = parseInt(dates[dates.length - 1]);
+      let startEpoch = parseInt(dates[0]);
+      let endEpoch = parseInt(dates[dates.length - 1]);
 
-        const startDate = new Date (parseInt(startEpoch) * 1000);
-        const range =  1 + (endEpoch - startEpoch) / (30 * 86400);
+      const startDate = new Date (parseInt(startEpoch) * 1000);
+      const endDate = new Date (parseInt(endEpoch) * 1000);
 
-        var cal = new CalHeatMap();
-        cal.init({
+      const range = 1 + endDate.getMonth() - startDate.getMonth() +
+        (12 * (endDate.getFullYear() - startDate.getFullYear()));
+
+      var cal = new CalHeatMap();
+      cal.init({
           start: startDate,
           range: range,
           domain: "month",
