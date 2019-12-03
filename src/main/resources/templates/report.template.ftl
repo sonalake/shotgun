@@ -97,9 +97,11 @@
     <table class="table table-sm">
       <thead>
       <tr>
-        <th scope="col">Score</th>
-        <th scope="col">Commit</th>
-        <th scope="col">Files</th>
+        <th scope="col" width="5%">Score</th>
+        <th scope="col" width="25%">Commit</th>
+        <th scope="col" width="5%">Type</th>
+        <th scope="col" width="10%">Source Set</th>
+        <th scope="col" width="*">File</th>
       </tr>
       </thead>
       <tbody id="commit-log">

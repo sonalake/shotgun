@@ -24,40 +24,26 @@
 
           for (const c in candidate.commits) {
             const commit = candidate.commits[c];
-            const row = $(
-            `<tr>
-              <td>${commit.score}</td>
-              <td>${commit.committer}
-              <br/><sub>${commit.commit}</sub>
-              <br/><small class="text-muted">${commit.message}</small>
-              </td></tr>
-            `);
 
-            const commitFileTable = $(`
-                <table class="table table-sm">
-                  <thead>
-                  <tr>
-                    <th scope="col">Type</th>
-                    <th scope="col">Source Set</th>
-                    <th scope="col">File</th>
-                  </tr>
-                  </thead>
-                </table>`);
-
-
-            const files = $(`<tbody></tbody>`);
-
+            let isFirst = true;
             for (f in commit.entries) {
               const file = commit.entries[f];
-              files.append(`<tr>
-              <td><small class="text-muted">${file.changeType}</small></td>
-              <td><small class="text-muted">${file.sourceSet}</small></td>
-              <td><small class="text-muted">${file.path}</small></td>
-              </tr>`);
+              const row = $('<tr>');
+              if (isFirst) {
+                row.append($(`<td rowspan="${commit.entries.length}">${commit.score}</td>`));
+                row.append($(`<td rowspan="${commit.entries.length}">${commit.committer}
+                  <br/><sub>${commit.commit}</sub>
+                  <br/><small class="text-muted">${commit.message}</small>
+                  </td>`));
+                 isFirst = false;
+              }
+
+              row.append($(`<td><small class="text-muted">${file.changeType}</small></td>`));
+              row.append($(`<td><small class="text-muted">${file.sourceSet}</small></td>`));
+              row.append($(`<td><small class="text-muted">${file.path}</small></td>`));
+
+               $('#commit-log').append(row)
             }
-            commitFileTable.append(files)
-            row.append($('<td>').append(commitFileTable));
-            $('#commit-log').append(row)
           }
           return;
         }
