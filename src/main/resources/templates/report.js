@@ -116,9 +116,40 @@
       const startDate = new Date (parseInt(startEpoch) * 1000);
       const endDate = new Date (parseInt(endEpoch) * 1000);
 
-      const range = 1 + endDate.getMonth() - startDate.getMonth() +
-        (12 * (endDate.getFullYear() - startDate.getFullYear()));
+      // limit the presentation to a year
+      const YEAR = 12;
+      const full_range =  1 + endDate.getMonth() - startDate.getMonth() +
+                                 (YEAR * (endDate.getFullYear() - startDate.getFullYear()));
+      const range = Math.min(YEAR, full_range);
 
+      // if we have more data than 1 year then we add buttons to allow the user
+      // to move back and forth
+      if (range !== full_range) {
+
+        $('#calendar-buttons')
+          .append(`    <button type="button" class="btn btn-primary" id="previous">Previous</button>
+                       <button type="button" class="btn btn-primary" id="reset">Reset</button>
+                       <button type="button" class="btn btn-primary" id="next">Next</button>  `);
+
+        let currentStart = startDate;
+        $('#next').on("click" , () => {
+            currentStart = new Date(currentStart.getFullYear() + 1, currentStart.getMonth(), currentStart.getDate());
+            cal.jumpTo(currentStart);
+        })
+
+        $('#reset').on("click" , () => {
+            currentStart = startDate;
+            cal.jumpTo(currentStart);
+        })
+
+
+        $('#previous').on("click" , () => {
+            currentStart = new Date(currentStart.getFullYear() - 1, currentStart.getMonth(), currentStart.getDate());
+            cal.jumpTo(currentStart);
+        })
+      }
+
+      // render the calendar
       var cal = new CalHeatMap();
       cal.init({
           start: startDate,
@@ -132,6 +163,7 @@
           itemName: ["score", "score"],
           legend: LEGEND,
           legendCellSize:20,
+          domainLabelFormat: "%B %Y",
           subDomainTitleFormat: {
             empty: "{date}",
             filled: "{date}: {name} -> {count}  "

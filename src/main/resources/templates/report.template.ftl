@@ -32,10 +32,18 @@
   <small class="text-muted">Calculated by <a href="https://bitbucket.org/sonalake/shotgun/src/master/README.md">shotgun</a></small>
 
   <div id="cal-heatmap"></div>
+
+
   <small class="text-muted">
     How complex are commits over time, where the darker a day is, the more complex the commits
     are. Click on a given day for more details.
   </small>
+  <br/>
+  <div id ="calendar-buttons">
+  </div>
+
+
+
   <hr/>
 
 
@@ -114,7 +122,11 @@
       "busySets" : BUSY_SETS,
       "commitData" : COMMIT_DATA
     }
+-->
+</script>
 
+<script type="text/javascript">
+<!--
 <#include "report.js" parse=false>
 -->
 </script>
