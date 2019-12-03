@@ -80,15 +80,16 @@ Usage: <main class> [options]
       Print this help message
   * -i, --input-dir
       The working directory, must be a git root directory
+    -ll, --legend-levels
+      The legend levels
+      Default: [15, 30, 45, 60, 90, 120, 150]
     -o, --output-file
       The output file location
       Default: .shotgun/report.html
     -s, --source-set
-      A source set to split by
-      Default: []
-    -l, --legendLevel
-      add legend level
-      Default: [10, 20, 30, 50, 80, 120]
+      A source set to split by, defaults to a gradle standard
+      Default: [src/main/java, src/main/resources, src/main/webapp, src/test/java, src/test/resources]
+
 
 ```    
 

@@ -44,7 +44,7 @@ public class Params {
   private Integer topCommitValueForFiles = 40;
 
   @Parameter(names = {"-ll", "--legend-levels"}, description = "The legend levels")
-  private List<Integer> legendLevels = asList(10, 20, 30, 50, 80, 120);
+  private List<Integer> legendLevels = asList(15, 30, 45, 60, 90, 120, 150);
 
 
   public ShotgunConfig toConfig() {
