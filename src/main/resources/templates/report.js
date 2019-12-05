@@ -108,37 +108,43 @@
                                  (YEAR * (endDate.getFullYear() - startDate.getFullYear()));
       const range = Math.min(YEAR, full_range);
 
+      // if we have less than a year, we just render the data we have, starting
+      // at the start date
+      let renderStartDate = startDate;
       // if we have more data than 1 year then we add buttons to allow the user
       // to move back and forth
       if (range !== full_range) {
-
+         // otherwise we render it by calendar year
+         // with the *last* year first
+         // starting in january
+        renderStartDate = new Date(endDate.getFullYear(), 0, 1);
         $('#calendar-buttons')
           .append(`    <button type="button" class="btn btn-primary" id="previous">Previous</button>
                        <button type="button" class="btn btn-primary" id="reset">Reset</button>
                        <button type="button" class="btn btn-primary" id="next">Next</button>  `);
 
-        let currentStart = startDate;
+        let currentStart = renderStartDate;
         $('#next').on("click" , () => {
             currentStart = new Date(currentStart.getFullYear() + 1, currentStart.getMonth(), currentStart.getDate());
-            cal.jumpTo(currentStart);
+            cal.jumpTo(currentStart, true);
         })
 
         $('#reset').on("click" , () => {
-            currentStart = startDate;
-            cal.jumpTo(currentStart);
+            currentStart = renderStartDate;
+            cal.jumpTo(currentStart, true);
         })
 
 
         $('#previous').on("click" , () => {
             currentStart = new Date(currentStart.getFullYear() - 1, currentStart.getMonth(), currentStart.getDate());
-            cal.jumpTo(currentStart);
+            cal.jumpTo(currentStart, true);
         })
       }
 
       // render the calendar
       var cal = new CalHeatMap();
       cal.init({
-          start: startDate,
+          start: renderStartDate,
           range: range,
           domain: "month",
           subDomain: "x_day",
