@@ -44,7 +44,7 @@ The intention is to spot hotspots in the code that require a lot of attention
 Each individual day can also be examined to see what commits went into the 
 calculation of that day's score.
 
-![](docs/daily.png)
+![](docs/dail#y.png)
 
  
 # How to build and use this?
@@ -158,16 +158,4 @@ Should a given day have multiple commits, then it is the _median_ of that day's 
 that will be used.
 
 Should a weekend have _any_ commits then management owes the team an apology ;)
-
-
-# Thanks to third party libraries
-
-This report embeds a few other libraries into its page, rather than using CDNs, 
-because it makes it easier to ask Jenkins to render this
-
-The libs embedded in the html page are:
-
-- [Bootstrap](https://getbootstrap.com/) for the general presentation
-- [jQuery](https://jquery.com/) for general monkey-business
-- [CalHeatMap](https://cal-heatmap.com/) for the heat map, a [d3](https://d3js.org/) component.
 
