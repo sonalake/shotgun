@@ -3,6 +3,7 @@ package com.sonalake.shotgun.usage;
 import com.sonalake.shotgun.git.FileDiffNotifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -14,6 +15,7 @@ import org.jgrapht.graph.DirectedAcyclicGraph;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.sonalake.shotgun.usage.Utils.identifyPath;
@@ -101,7 +103,8 @@ public class ShotgunModel implements FileDiffNotifier {
       if (files.size() == 1) {
         score.add(1.0);
       } else {
-        DirectedAcyclicGraph<String, DefaultWeightedEdge> graph = buildGraph(entries);
+        List<DiffEntry> thisSetDiffEntries = setEntries.stream().map(CommitEntry::getEntry).collect(Collectors.toList());
+        DirectedAcyclicGraph<String, DefaultWeightedEdge> graph = buildGraph(thisSetDiffEntries);
 
         // each subgraph is a distinct tree
         new ConnectivityInspector<>(graph)

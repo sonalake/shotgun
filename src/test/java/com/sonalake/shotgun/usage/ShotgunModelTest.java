@@ -15,13 +15,13 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Map.of;
-import static org.eclipse.jgit.diff.DiffEntry.ChangeType.ADD;
-import static org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE;
+import static org.eclipse.jgit.diff.DiffEntry.ChangeType.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ShotgunModelTest {
 
   public static final String JAVA_SRC_MAIN = "java/src/main";
+  public static final String JAVA_SRC_TEST = "java/src/test";
   public static final String JAVA_SRC_RESOURCES = "java/src/resources";
 
   @Test
@@ -254,12 +254,51 @@ public class ShotgunModelTest {
   }
 
 
+  @Test
+  public void multipleCommitsInTwoHierarchies(@TempDir Path working) throws InterruptedException, IOException, GitAPIException, TemplateException {
+
+    // setup
+    Path gitDir = working.resolve("git");
+    Path outputDir = working.resolve("out");
+
+    // given a git history of one commit with one file in it
+    GitTestHelper git = new GitTestHelper(gitDir)
+      .init()
+      .checkout("work")
+      .file(JAVA_SRC_MAIN + "/com/sonalake/bilval/file", "FileService.java")
+      .file(JAVA_SRC_MAIN + "/com/sonalake/bilval/service/jobs/ccb", "UploadFileService.java")
+      .file(JAVA_SRC_TEST + "/com/sonalake/bilval/file", "FileServiceTest.java")
+      .file(JAVA_SRC_TEST + "/com/sonalake/bilval/file/delivery", "FileDeliveryServiceTest.java")
+      .file(JAVA_SRC_TEST + "/com/sonalake/bilval/service/jobs/ccb", "UploadFileServiceTest.java")
+      .commit()
+      .checkout("master").merge("work");
+
+
+    // when we process the commits
+    ShotgunModel model = givenModel(working, outputDir);
+    new GitDiffer(gitDir).scanRepo(model);
+
+    // then the score is 3
+    List<CommitShotgun> scores = model.getScores();
+    assertScore(scores.get(0), 6.0 + 8.0,
+      of(ADD, asList(
+        "java/src/main/com/sonalake/bilval/file/FileService.java",
+        "java/src/main/com/sonalake/bilval/service/jobs/ccb/UploadFileService.java",
+        "java/src/test/com/sonalake/bilval/file/FileServiceTest.java",
+        "java/src/test/com/sonalake/bilval/file/delivery/FileDeliveryServiceTest.java",
+        "java/src/test/com/sonalake/bilval/service/jobs/ccb/UploadFileServiceTest.java"
+      )));
+
+  }
+
+
   private ShotgunModel givenModel(@TempDir Path working, Path outputDir) {
     return new ShotgunModel(
       ShotgunConfig.builder()
         .outputFile(working.resolve(outputDir))
         .sourceSet(JAVA_SRC_MAIN)
         .sourceSet(JAVA_SRC_RESOURCES)
+        .sourceSet(JAVA_SRC_TEST)
         .build()
     );
   }

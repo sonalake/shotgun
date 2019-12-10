@@ -57,6 +57,7 @@ public class Utils {
         return CommitEntry.builder()
           .changeType(entry.getChangeType())
           .sourceSet(candidate)
+          .entry(entry)
           .path(StringUtils.substringAfter(path, candidate))
           .build();
       }
@@ -64,6 +65,7 @@ public class Utils {
 
     return CommitEntry.builder()
       .changeType(entry.getChangeType())
+      .entry(entry)
       .sourceSet("")
       .path(path)
       .build();

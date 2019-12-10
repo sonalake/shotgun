@@ -17,6 +17,9 @@ public class CommitEntry {
   private final DiffEntry.ChangeType changeType;
 
   @JsonIgnore
+  private final DiffEntry entry;
+
+  @JsonIgnore
   public String getFullPath() {
     return trimToEmpty(getSourceSet()) + getPath();
   }
