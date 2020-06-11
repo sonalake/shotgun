@@ -30,7 +30,7 @@ What does this produce?
 **NOTE:** When deriving the heatmap for a given day, it is the _median_ score for that
 day that is used.
 
-![](docs/hotspot.png)
+![Sample hotspot view](docs/hotspot.png)
 
 Where:
 
@@ -44,7 +44,7 @@ The intention is to spot hotspots in the code that require a lot of attention
 Each individual day can also be examined to see what commits went into the 
 calculation of that day's score.
 
-![](docs/dail#y.png)
+![Sample view of commits for a day](docs/daily.png)
 
  
 # How to build and use this?
