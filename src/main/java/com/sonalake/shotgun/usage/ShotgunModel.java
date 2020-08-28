@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.ignore.FastIgnoreRule;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.AsSubgraph;
@@ -64,13 +65,13 @@ public class ShotgunModel implements FileDiffNotifier {
     entries.forEach(entry -> {
       CommitEntry commitEntry = identifyPath(entry, config.getSourceSets());
 
-      String[] pathElements = StringUtils.split(commitEntry.getPath(), File.separator);
+      String[] pathElements = StringUtils.split(commitEntry.getPath(), FastIgnoreRule.PATH_SEPARATOR);
 
       String lastElement = null;
       for (int i = 0; i != pathElements.length; i++) {
         String element = StringUtils.join(
           Arrays.copyOfRange(pathElements, 0, i + 1),
-          File.separator
+          FastIgnoreRule.PATH_SEPARATOR
         );
         if (!graph.containsVertex(element)) {
           graph.addVertex(element);
