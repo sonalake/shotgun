@@ -1,0 +1,127 @@
+/* custom styles */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  text-align: left;
+  background-color: #f3f4f6;
+}
+
+.container {
+  background-color: #f3f4f6;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin: 5rem auto;
+}
+
+.container-fluid {
+  width: 100%;
+  border-radius: 8px;
+  padding: 0 3.5rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+}
+
+.title {
+  text-align: center;
+  font-size: 60px;
+  font-weight: 800;
+}
+
+.sub-title {
+  text-align: center;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.heatmap {
+  min-height: 160px;
+  margin: 2rem 2rem 0;
+}
+
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.heatmap-controller {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-calendar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-container {
+  height: 100%;
+}
+
+.btn-calendar {
+  background-color: #f3f4f6;
+  color: #808080;
+  padding: 2rem 8px;
+  border-radius: 3px;
+  margin-left: 2px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: opacity 0.5s linear;
+}
+
+.btn-navigate-container {
+  min-width: 30.53px;
+}
+
+.btn-container {
+  margin-bottom: 0.5rem;
+}
+
+.small-block {
+  display: inline-block;
+}
+
+.hotspots-container {
+  margin-top: 1rem;
+}
+
+.active-commits-container {
+  max-height: 590px;
+  overflow: auto;
+}
+
+.active-files-container {
+  max-height: 692px;
+  overflow: auto;
+}
+
+.table-without-margin {
+  margin-bottom: 0;
+}
+
+.text-wrap {
+  overflow-wrap: anywhere;
+}
+
+.text-legend {
+  margin-left: 2.5rem;
+}
+
+.footer {
+  display: flex;
+  padding: 1rem 3.5rem;
+  margin: 2rem -3.5rem 0;
+  border-top: 1px solid lightgray;
+}

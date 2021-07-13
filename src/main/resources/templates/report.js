@@ -49,7 +49,7 @@ const show_commit_log = (date, value, resultData) => {
 
                     row.append($(`<td><small class="text-muted">${file.changeType}</small></td>`));
                     row.append($(`<td><small class="text-muted">${file.sourceSet}</small></td>`));
-                    row.append($(`<td><small class="text-muted">${file.path}</small></td>`));
+                    row.append($(`<td><small class="text-muted text-wrap">${file.path}</small></td>`));
 
                     $('#commit-log').append(row)
                 }
@@ -130,52 +130,58 @@ const build_calendar = (resultData, heatData) => {
         // with the *last* year first
         // starting in january
         renderStartDate = new Date(endDate.getFullYear(), 0, 1);
-        $('#calendar-buttons')
-            .append(`    <button type="button" class="btn btn-primary" id="previous">Previous</button>
-                         <button type="button" class="btn btn-primary" id="reset">Reset</button>
-                         <button type="button" class="btn btn-primary" id="next">Next</button>  `);
-
-        let currentStart = renderStartDate;
-        $('#next').on("click", () => {
-            currentStart = new Date(currentStart.getFullYear() + 1, currentStart.getMonth(), currentStart.getDate());
-            cal.jumpTo(currentStart, true);
-        })
-
-        $('#reset').on("click", () => {
-            currentStart = renderStartDate;
-            cal.jumpTo(currentStart, true);
-        })
-
-
-        $('#previous').on("click", () => {
-            currentStart = new Date(currentStart.getFullYear() - 1, currentStart.getMonth(), currentStart.getDate());
-            cal.jumpTo(currentStart, true);
-        })
     }
+
+    $("#next").on("click", () => {
+        cal.next(7);
+    });
+
+    $("#reset").on("click", () => {
+        cal.jumpTo(renderStartDate, true);
+    });
+
+    $("#previous").on("click", () => {
+        cal.previous(7);
+    });
 
     // render the calendar
     var cal = new CalHeatMap();
     cal.init({
         start: renderStartDate,
-        range: range,
+        range: 7,
         domain: "month",
         subDomain: "x_day",
         label: {
-            position: "top"
+            position: "top",
         },
-        legend: LEGEND,
         itemName: ["score", "score"],
         legend: LEGEND,
-        legendCellSize: 20,
+        legendCellSize: 15,
         domainLabelFormat: "%B %Y",
         subDomainTitleFormat: {
             empty: "{date}",
-            filled: "{date}: {name} -> {count}  "
+            filled: "{date}: {name} -> {count}  ",
         },
         cellSize: 15,
         domainGutter: 15,
         onClick: inner_show_commit_log,
-        data: heatData
+        data: heatData,
+        minDate: resultData.firstCommitDate,
+        maxDate: resultData.lastCommitDate,
+        onMaxDomainReached: (hit) => {
+            if (hit) {
+                $("#next").hide()
+            } else {
+                $("#next").show()
+            }
+        },
+        onMinDomainReached: (hit) => {
+            if (hit) {
+                $("#previous").hide()
+            } else {
+                $("#previous").show()
+            }
+        }
     });
 }
 
