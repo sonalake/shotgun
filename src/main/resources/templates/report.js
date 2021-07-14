@@ -14,6 +14,7 @@ const show_commit_log = (date, value, resultData) => {
     $('#commit-details').show();
     $('#commit-summary').empty();
     $('#commit-log').empty();
+    $('#commit-list').empty();
 
     // This date is the date we're looking for, we loop through all the commits
     // and only work with the commits done on this given day
@@ -23,36 +24,66 @@ const show_commit_log = (date, value, resultData) => {
 
         if (check === candidate.epochSecond) {
             // add the common summary for this commit day
-            $('#commit-summary').append('<p>').append('<ul>')
-                .append($(`<li>Date: ${date}</li>`))
-                .append($(`<li>Median Score: ${candidate.score} <small class="text-muted">
+            const commitSummary = $(`<ul class="list-unstyled"></ul>`)
+            commitSummary                
+              .append($(`<li>Date: ${date}</li>`))
+              .append($(`<li>Median Score: ${candidate.score} <small class="text-muted">
               - (${candidate.commits.slice().reverse().map(i => i.score).join(",")})</small> </li>`))
-                .append($(`<li>Commits: ${candidate.commits.length}</li>`));
+              .append($(`<li>Commits: ${candidate.commits.length}</li>`));
+            $('#commit-summary').append(commitSummary)
 
             // now look through all the commits for today
             for (const c in candidate.commits) {
                 const commit = candidate.commits[c];
+                const listItem = $('<li class="list-group-item mb-4"></li>');
 
-                // we span these, so each file entry is in the same row
-                let isFirst = true;
-                for (f in commit.entries) {
-                    const file = commit.entries[f];
-                    const row = $('<tr>');
-                    if (isFirst) {
-                        row.append($(`<td rowspan="${commit.entries.length}">${commit.score}</td>`));
-                        row.append($(`<td rowspan="${commit.entries.length}">${commit.committer}
-                    <br/><sub>${commit.commit}</sub>
-                    <br/><small class="text-muted">${commit.message}</small>
-                    </td>`));
-                        isFirst = false;
-                    }
+                // commit header, score, author, sha
+                const commitHeader = $('<div id="commit-header"></div>')
+                  .append($(
+                    `<div class="commit-score"><strong>Score:</strong> ${commit.score}</div>`
+                  ))
+                  .append($(
+                    `<span class="commit-committer">${commit.committer}</span>`
+                  ))
+                  .append($(
+                    `<span title='${commit.commit}' class="commit-sha">${commit.commit.substring(0, 7)}</span>`
+                  ))
+                listItem.append(commitHeader)
 
-                    row.append($(`<td><small class="text-muted">${file.changeType}</small></td>`));
-                    row.append($(`<td><small class="text-muted">${file.sourceSet}</small></td>`));
-                    row.append($(`<td><small class="text-muted text-wrap">${file.path}</small></td>`));
+                // commit message and approvers
+                const commitDescription = $('<div id="commit-description"></div>')
+                const splitter = 'Approved-by';
+                commit.message.split(splitter).forEach((messagePart, index) => {
+                  commitDescription.append($(
+                    `<div>${index === 0 ? messagePart : `<span class="font-weight-bold">Approved-by</span>${messagePart}`}</div>`
+                  ))
+                })
+                listItem.append(commitDescription)
 
-                    $('#commit-log').append(row)
-                }
+                // commit entries table
+                const commitEntriesTable = $(
+                  `<table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col" width="5%">Type</th>
+                        <th scope="col" width="10%">Source Set</th>
+                        <th scope="col" width="*">File</th>
+                      </tr>
+                    </thead>
+                    
+                  </table>`
+                )
+                listItem.append(commitEntriesTable)
+                commit.entries.forEach(entry => {
+                  const commitLog = $('<tbody id="commit-log"></tbody>');
+                  const row = $('<tr></tr>');
+                  row.append($(`<td><small class="text-muted">${entry.changeType}</small></td>`));
+                  row.append($(`<td><small class="text-muted">${entry.sourceSet}</small></td>`));
+                  row.append($(`<td><small class="text-muted text-wrap">${entry.path}</small></td>`));
+                  commitLog.append(row);
+                  commitEntriesTable.append(commitLog);
+                })
+                $('#commit-list').append(listItem)
             }
             return;
         }

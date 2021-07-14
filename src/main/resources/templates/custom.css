@@ -125,3 +125,18 @@ body {
   margin: 2rem -3.5rem 0;
   border-top: 1px solid lightgray;
 }
+
+#commit-header {
+  margin-bottom: 1rem;
+  font-size: 24px;
+  line-height: 1.5rem;
+}
+
+#commit-header > span {
+  margin-right: 0.5rem;
+  font-size: 20px;
+}
+
+#commit-description {
+  margin-bottom: 1rem;
+}

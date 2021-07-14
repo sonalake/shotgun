@@ -113,18 +113,7 @@
         <h4>Commit details</h4>
         <div id="commit-summary"></div>
         <div>
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th scope="col" width="5%">Score</th>
-                <th scope="col" width="25%">Commit</th>
-                <th scope="col" width="5%">Type</th>
-                <th scope="col" width="10%">Source Set</th>
-                <th scope="col" width="*">File</th>
-              </tr>
-            </thead>
-            <tbody id="commit-log"></tbody>
-          </table>
+          <ul class="list-group" id="commit-list"></ul>
         </div>
       </div>
       <div class="footer">
