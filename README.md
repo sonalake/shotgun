@@ -20,7 +20,7 @@ examines the graph of how files get changed over time by examining the git
 history and deriving a score based on the _inter-relatedness_ of the files.
 
 
-Perhaps the easiest way to use this is with the [shotgun-gradle-plugin](https://bitbucket.org/sonalake/shotgun-gradle-plugin/)
+Perhaps the easiest way to use this is with the [shotgun-gradle-plugin](https://github.com/sonalake/shotgun-gradle-plugin)
 
 # Output format
 
@@ -101,7 +101,7 @@ might be:
 
 ## Gradle plugin
 
-There is also a gradle plugin for this: [shotgun-gradle-plugin](https://bitbucket.org/sonalake/shotgun-gradle-plugin/)
+There is also a gradle plugin for this: [shotgun-gradle-plugin](https://github.com/sonalake/shotgun-gradle-plugin)
 
 # How is shotgun coherency calculated?
 
