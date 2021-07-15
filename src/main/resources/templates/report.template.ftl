@@ -119,7 +119,7 @@
       <div class="footer">
         <small class="text-muted small-block">
           Calculated by
-          <a href="https://bitbucket.org/sonalake/shotgun/src/master/README.md">
+          <a href="https://github.com/sonalake/shotgun/blob/main/README.md">
             shotgun
           </a>
         </small>

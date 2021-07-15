@@ -97,7 +97,7 @@ A sample usage where we want to specify source sets, but otherwise accept the de
 might be:
 
     java -jar build/libs/shotgun-all.jar \    
-    -i ~/workspaces/enet/billing-validation 
+    -i ~/workspaces/billing-validation 
 
 ## Gradle plugin
 
