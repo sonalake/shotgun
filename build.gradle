@@ -3,37 +3,45 @@ buildscript {
   repositories {
     mavenCentral()
   }
-  ext {
-    lombokVersion = '1.18.4'
-  }
-  dependencies {
-    classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
-  }
 }
 
 
 plugins {
   id 'java'
-
-  id "io.freefair.lombok" version "4.1.5"
+  id 'com.github.kt3k.coveralls' version '2.10.1'
+  id "io.freefair.lombok" version "4.1.6"
   id 'com.github.johnrengelman.shadow' version '5.2.0'
-  id "jacoco"
-  id "org.sonarqube" version "2.8"
-
-  id 'maven'
-  id 'maven-publish'
 }
-apply from: "gradle/sonar.gradle"
-// for publication to nexus
-apply plugin: 'maven-publish-auth'
 
-group = "com.sonalake"
-version = "1.0.0-SNAPSHOT"
+apply plugin: 'jacoco'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+
+
+// a parameter is defined if it's been passed in and isn't blank
+ext.isParameterDefined = { String paramName ->
+  return project.hasProperty(paramName) && !project.getProperties().get(paramName).toString().isBlank();
+}
+
+// some configs of interest to the developer
+// don't try to sign and release if we have the settings we care about
+ext.isForSigning = isParameterDefined("signing.keyId") && isParameterDefined("signing.password")
+// don't try to publish to OSSRH if there is no username/password
+ext.isForOssrhPublishing = isParameterDefined('ossrhUsername') && isParameterDefined('ossrhPassword')
+// is this a release or a snapshot
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+// don't try to publish the gradle plugin if there is no key/secret
+ext.isForPluginPublishing = isParameterDefined('gradle.publish.key') && isParameterDefined('gradle.publish.secret')
 
 
 repositories {
   jcenter()
+  mavenCentral()
+  maven { url "https://repo.spring.io/plugins-release/" }
+  maven { url "https://maven.geomajas.org/" }
 }
+
 
 dependencies {
   implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.5.1.201910021850-r'
@@ -59,6 +67,33 @@ dependencies {
 
 
 }
+
+
+jacocoTestReport {
+  reports {
+    html.enabled = true
+    xml.enabled = true
+    csv.enabled = false
+  }
+}
+test {
+  useJUnitPlatform()
+  finalizedBy jacocoTestReport
+}
+
+task javadocJar(type: Jar) {
+  archiveClassifier = 'javadoc'
+  from javadoc
+}
+
+task sourcesJar(type: Jar) {
+  archiveClassifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives javadocJar, sourcesJar
+}
 jar {
   manifest {
     attributes(
@@ -66,33 +101,6 @@ jar {
     )
   }
 }
-test {
-  useJUnitPlatform()
-}
 
-publishing {
-  publications {
-    jar(MavenPublication) {
-      from components.java
-    }
 
-    cli(MavenPublication) {
-      artifact("build/libs/shotgun-${version}-all.jar")
-      pom {
-        description = "CLI uberjar for ${rootProject.name}"
-        artifactId = "${rootProject.name}-cli"
-        packaging = "jar"
-      }
-    }
-
-  }
-  repositories {
-    maven {
-      def rootUrl = "http://atlanta.sonalake.corp:8081/nexus/content/repositories"
-      name = version.endsWith("SNAPSHOT") ? 'snapshots' : 'releases'
-      url "$rootUrl/$name"
-      allowInsecureProtocol true
-    }
-  }
-}
 
