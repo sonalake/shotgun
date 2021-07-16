@@ -57,7 +57,7 @@ To build the commandline tool:
 
 And to use it, just pass in `-h` to the fatjar to see the options
 
-    java -jar build/libs/shotgun-all.jar -h
+    java -jar build/libs/shotgun-${version}-all.jar -h
 
 
 The only mandatory option is `-i, --input-dir`
