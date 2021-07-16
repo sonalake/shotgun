@@ -2,7 +2,7 @@
 _(shoot 'em 'fore they run now)_
 
 [![CI Build](https://github.com/sonalake/shotgun/workflows/CI%20Build/badge.svg)](https://github.com/sonalake/shotgun)
-[![codecov](https://codecov.io/gh/sonalake/shotgun/branch/master/graph/badge.svg)](https://codecov.io/gh/sonalake/shotgun)
+[![codecov](https://codecov.io/gh/sonalake/shotgun/branch/main/graph/badge.svg)](https://codecov.io/gh/sonalake/shotgun)
 
 
 ## What does this do?
