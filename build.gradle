@@ -19,7 +19,7 @@ apply plugin: 'signing'
 
 
 group = 'com.sonalake'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = '11'
 
 // a parameter is defined if it's been passed in and isn't blank
